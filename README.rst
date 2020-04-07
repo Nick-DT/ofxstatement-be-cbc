@@ -23,8 +23,6 @@ Either:
 #. Download from `pypi <https://pypi.org/project/ofxstatement-be-cbc>`_ and run
    :code:`$ python setup.py install`
 #. Install using pip: :code:`$ pip install ofxstatement-be-cbc`
-#. Arch linux users can install `AUR package ofxstatement-be-cbc
-   <https://aur.archlinux.org/packages/ofxstatement-be-cbc/>`_
 
 Usage
 =====
