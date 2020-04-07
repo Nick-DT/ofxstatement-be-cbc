@@ -5,20 +5,20 @@ from ofxstatement.exceptions import ParseError
 import csv
 
 LINELENGTH = 18
-HEADER_START = "Rekeningnummer"
+HEADER_START = "Numéro de compte"
 
 
-class KbcBePlugin(Plugin):
-    """Belgian KBC Bank plugin for ofxstatement
+class CbcBePlugin(Plugin):
+    """Belgian CBC Bank plugin for ofxstatement
     """
 
     def get_parser(self, filename):
         f = open(filename, 'r')
-        parser = KbcBeParser(f)
+        parser = CbcBeParser(f)
         return parser
 
 
-class KbcBeParser(CsvStatementParser):
+class CbcBeParser(CsvStatementParser):
     date_format = "%d/%m/%Y"
 
     mappings = {
@@ -74,6 +74,6 @@ class KbcBeParser(CsvStatementParser):
         else:
             self.statement.currency = line[3]
 
-        stmt_ln = super(KbcBeParser, self).parse_record(line)
+        stmt_ln = super(CbcBeParser, self).parse_record(line)
 
         return stmt_ln

@@ -1,8 +1,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Belgian KBC Bank plugin for ofxstatement
+Belgian CBC Bank plugin for ofxstatement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This project provides an `ofxstatement`_ plugin for converting the Belgian KBC
+This project provides an `ofxstatement`_ plugin for converting the Belgian CBC
 bank's CSV format statements to OFX.
 
 `ofxstatement`_ is a tool to convert proprietary bank statement to OFX format,
@@ -20,15 +20,15 @@ Installation
 ============
 Either:
 
-#. Download from `pypi <https://pypi.org/project/ofxstatement-be-kbc>`_ and run
+#. Download from `pypi <https://pypi.org/project/ofxstatement-be-cbc>`_ and run
    :code:`$ python setup.py install`
-#. Install using pip: :code:`$ pip install ofxstatement-be-kbc`
-#. Arch linux users can install `AUR package ofxstatement-be-kbc
-   <https://aur.archlinux.org/packages/ofxstatement-be-kbc/>`_
+#. Install using pip: :code:`$ pip install ofxstatement-be-cbc`
+#. Arch linux users can install `AUR package ofxstatement-be-cbc
+   <https://aur.archlinux.org/packages/ofxstatement-be-cbc/>`_
 
 Usage
 =====
-Basically: :code:`$ ofxstatement convert -t kbcbe input.csv output.ofx`
+Basically: :code:`$ ofxstatement convert -t cbcbe input.csv output.ofx`
 
 General usage of ofxstatement:
 
