@@ -21,13 +21,20 @@ class CbcBePlugin(Plugin):
 class CbcBeParser(CsvStatementParser):
     date_format = "%d/%m/%Y"
 
-    mappings = {
-        'memo': 6,
-        'date': 5,
-        'amount': 8,
-        'check_no': 4,
-        'refnum': 4
+    header =["Numéro de compte","Nom de la rubrique","Nom","Devise","Numéro de l'extrait","Date",
+             "Description","Valeur","Montant","Solde","crédit","débit",
+             "numéro de compte contrepartie","BIC contrepartie","Nom contrepartie",
+             "Adresse contrepartie","communication structurée","Communication libre"]
 
+    col_index = dict(zip(header, range(0, 18)))
+
+    mappings = {
+        'memo'      : col_index['Description'],
+        'date'      : col_index['Date'],
+        'amount'    : col_index['Montant'],
+        'check_no'  : col_index["Numéro de l'extrait"],
+        'refnum'    : col_index["Numéro de l'extrait"],
+        'id'     : col_index["Numéro de l'extrait"]
     }
 
     line_nr = 0
@@ -75,5 +82,21 @@ class CbcBeParser(CsvStatementParser):
             self.statement.currency = line[3]
 
         stmt_ln = super(CbcBeParser, self).parse_record(line)
+
+        # Now if available add the account nb, and if no payee name use account nb instead
+        stmt_ln.payee = line[self.col_index['numéro de compte contrepartie']].strip() # Payee defaults to account nb
+        if line[self.col_index['Nom contrepartie']] :
+            if (not line[self.col_index['numéro de compte contrepartie']]) : 
+                stmt_ln.payee = line[self.col_index['Nom contrepartie']].strip() # but if empty and name isn't, take the name
+            else : 
+                stmt_ln.payee = line[self.col_index['Nom contrepartie']].strip() +" - "+ stmt_ln.payee
+
+        stmt_ln.trntype = 'DEBIT' if stmt_ln.amount < 0 else 'CREDIT'
+
+        # Additional ID for software relying on it
+        #stmt_ln.id = line[self.col_index["Numéro de l'extrait"]]
+        stmt_ln.id = stmt_ln.id.strip()
+        stmt_ln.check_no= stmt_ln.check_no.strip()
+        stmt_ln.refnum  = stmt_ln.refnum.strip()
 
         return stmt_ln
