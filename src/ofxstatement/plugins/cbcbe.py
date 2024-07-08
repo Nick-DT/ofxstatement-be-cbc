@@ -3,6 +3,7 @@ from ofxstatement.parser import CsvStatementParser
 from ofxstatement.statement import StatementLine
 from ofxstatement.exceptions import ParseError
 import csv
+import re
 
 LINELENGTH = 18
 HEADER_START = "Numéro de compte"
@@ -34,7 +35,7 @@ class CbcBeParser(CsvStatementParser):
         'amount'    : col_index['Montant'],
         'check_no'  : col_index["Numéro de l'extrait"],
         'refnum'    : col_index["Numéro de l'extrait"],
-        'id'     : col_index["Numéro de l'extrait"]
+        'id'        : col_index["Numéro de l'extrait"]
     }
 
     line_nr = 0
@@ -86,10 +87,12 @@ class CbcBeParser(CsvStatementParser):
         # Now if available add the account nb, and if no payee name use account nb instead
         stmt_ln.payee = line[self.col_index['numéro de compte contrepartie']].strip() # Payee defaults to account nb
         if line[self.col_index['Nom contrepartie']] :
-            if (not line[self.col_index['numéro de compte contrepartie']]) : 
-                stmt_ln.payee = line[self.col_index['Nom contrepartie']].strip() # but if empty and name isn't, take the name
+            # Get rid of multiple spaces/tabs in payee name and assign it to payeetxt
+            payeetxt = re.sub(r'\s+', ' ', line[self.col_index['Nom contrepartie']].strip())
+            if (not line[self.col_index['numéro de compte contrepartie']]) : # if payee account NB is empty and name isn't, take the name
+                stmt_ln.payee = payeetxt 
             else : 
-                stmt_ln.payee = line[self.col_index['Nom contrepartie']].strip() +" - "+ stmt_ln.payee
+                stmt_ln.payee = payeetxt +" - "+ stmt_ln.payee
 
         stmt_ln.trntype = 'DEBIT' if stmt_ln.amount < 0 else 'CREDIT'
 
