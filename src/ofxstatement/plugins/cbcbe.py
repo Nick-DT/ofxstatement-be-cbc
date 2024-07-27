@@ -50,6 +50,34 @@ class CbcBeParser(CsvStatementParser):
         """
         return csv.reader(self.fin, delimiter=';')
 
+    def extract_bancontactPayee(self,description):
+        # Regular expression to match end of timing info
+        start_pattern = r"(?<=HEURES\s)\w"
+
+        # Regular expression to match start of card info
+        card_pattern = r"AVEC CARTE"
+
+        # Find all matches for end of timing
+        start_match = re.search(start_pattern, description)
+
+        if start_match :
+            
+            # Set start of capture section
+            start_index = start_match.start()
+
+            # Now check whether there the card info afterwards
+            card_match = re.search(card_pattern, description[start_index:])
+
+            if card_match:
+                end_index = start_index + card_match.start()
+            else : end_index = len(description)
+            
+            # Extract the text between the end of timing and the card info, or the end of the string
+            extracted_text = description[start_index:end_index].strip()
+
+            return extracted_text.strip()
+        else : return description
+
     def parse_record(self, line):
         """Parse given transaction line and return StatementLine object
         """
@@ -86,13 +114,16 @@ class CbcBeParser(CsvStatementParser):
 
         # Now if available add the account nb, and if no payee name use account nb instead
         stmt_ln.payee = line[self.col_index['numéro de compte contrepartie']].strip() # Payee defaults to account nb
-        if line[self.col_index['Nom contrepartie']] :
+        if line[self.col_index['Nom contrepartie']].strip() :
             # Get rid of multiple spaces/tabs in payee name and assign it to payeetxt
             payeetxt = re.sub(r'\s+', ' ', line[self.col_index['Nom contrepartie']].strip())
             if (not line[self.col_index['numéro de compte contrepartie']]) : # if payee account NB is empty and name isn't, take the name
                 stmt_ln.payee = payeetxt 
             else : 
                 stmt_ln.payee = payeetxt +" - "+ stmt_ln.payee
+        # Recover text from memo if payee is still empty (due to bancontact/maestro)
+        if not stmt_ln.payee.strip():
+            stmt_ln.payee = self.extract_bancontactPayee(line[self.col_index['Description']])
 
         stmt_ln.trntype = 'DEBIT' if stmt_ln.amount < 0 else 'CREDIT'
 
